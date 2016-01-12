@@ -1,4 +1,4 @@
-###### Java-2 ######
+###### MDF3 ######
 MDF3 at Full Sail by Tony Keiser
 
 ###### NOTES ######
