@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="match_parent"
+        android:id="@+id/textView5"
+        android:background="#FF4081"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/forward" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/status"
+        android:textColor="#FFF"
+        android:textSize="10dp"
+        android:gravity="center"
+        android:paddingBottom="3dp"
+        android:typeface="monospace"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:background="#303F9F"
+        android:paddingTop="0dp"
+        android:paddingBottom="12dp"
+        android:indeterminate="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/textView5" />
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:text="FORWARD"
+        android:id="@+id/forward"
+        android:background="#FF4081"
+        android:textColor="#FFF"
+        android:onClick="onClick"
+        android:layout_above="@+id/seekBar"
+        android:layout_alignStart="@+id/stop"
+        android:layout_marginTop="6dp" />
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:text="STOP"
+        android:id="@+id/stop"
+        android:background="#FF4081"
+        android:textColor="#FFF"
+        android:onClick="onClick"
+        android:layout_above="@+id/forward"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:text="PAUSE"
+        android:id="@+id/pause"
+        android:background="#FF4081"
+        android:textColor="#FFF"
+        android:onClick="onClick"
+        android:layout_below="@+id/play"
+        android:layout_alignStart="@+id/play" />
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:text="PLAY"
+        android:id="@+id/play"
+        android:background="#FF4081"
+        android:textColor="#FFF"
+        android:onClick="onClick"
+        android:layout_below="@+id/rewind"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="6dp" />
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:text="REWIND"
+        android:id="@+id/rewind"
+        android:background="#FF4081"
+        android:textColor="#FFF"
+        android:onClick="onClick"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="6dp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:id="@+id/mediaDetails"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/seekBar"
+        android:layout_toStartOf="@+id/textView5" />
+
+    <Switch
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/shuffle"
+        android:checked="false"
+        android:longClickable="false"
+        android:textColor="#ffffff"
+        android:background="#303F9F"
+        android:gravity="center_vertical"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/seekBar"
+        android:layout_below="@+id/mediaDetails"
+        android:paddingRight="12dp" />
+
+</RelativeLayout>

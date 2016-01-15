@@ -86,10 +86,50 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentTop="true"
+        android:layout_height="300dp"
         android:layout_alignParentStart="true"
+        android:id="@+id/mediaDetails"
+        android:layout_above="@+id/seekBar"
+        android:layout_alignParentTop="true"></FrameLayout>
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
         android:layout_above="@+id/background"
-        android:id="@+id/mediaDetails"></FrameLayout>
+        android:layout_alignParentStart="true"
+        android:background="#303F9F"
+        android:paddingTop="0dp"
+        android:paddingBottom="12dp"
+        android:indeterminate="false"
+        android:layout_toStartOf="@+id/forward" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/status"
+        android:layout_above="@+id/background"
+        android:textColor="#FFF"
+        android:textSize="10dp"
+        android:gravity="center"
+        android:paddingBottom="3dp"
+        android:typeface="monospace"
+        android:layout_toStartOf="@+id/shuffle" />
+
+    <Switch
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/shuffle"
+        android:checked="false"
+        android:longClickable="false"
+        android:textColor="#ffffff"
+        android:background="#303F9F"
+        android:gravity="center_vertical"
+        android:paddingRight="12dp"
+        android:layout_above="@+id/background"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/stop"
+        android:layout_below="@+id/mediaDetails" />
 
 </RelativeLayout>

@@ -7,8 +7,7 @@
         android:layout_height="270dp"
         android:id="@+id/artwork"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="10dp" />
+        android:layout_alignParentEnd="true" />
 
     <TextView
         android:layout_width="fill_parent"
@@ -20,7 +19,8 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
         android:gravity="center|clip_vertical"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:textSize="12dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -30,17 +30,8 @@
         android:id="@+id/artist"
         android:gravity="center|center_horizontal"
         android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Track Name"
-        android:id="@+id/track"
-        android:gravity="center|center_horizontal"
-        android:layout_below="@+id/textView4"
-        android:layout_alignEnd="@+id/artist" />
+        android:layout_centerHorizontal="true"
+        android:textSize="16dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -49,8 +40,10 @@
         android:text="Album Name"
         android:id="@+id/album"
         android:gravity="center|center_horizontal"
+        android:textSize="16dp"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/textView2"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentLeft="true" />
 
     <TextView
         android:layout_width="match_parent"
@@ -59,9 +52,8 @@
         android:text="TRACK"
         android:id="@+id/textView4"
         android:gravity="center|clip_vertical"
+        android:textSize="12dp"
         android:layout_below="@+id/artist"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
         android:layout_alignParentStart="true" />
 
     <TextView
@@ -71,8 +63,19 @@
         android:text="ALBUM"
         android:id="@+id/textView2"
         android:gravity="center|clip_vertical"
+        android:textSize="12dp"
         android:layout_below="@+id/track"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp" />
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Track Name"
+        android:id="@+id/track"
+        android:gravity="center|center_horizontal"
+        android:textSize="16dp"
+        android:layout_below="@+id/textView4"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

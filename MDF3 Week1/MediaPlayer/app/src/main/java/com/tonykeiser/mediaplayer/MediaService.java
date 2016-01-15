@@ -1,10 +1,6 @@
 package com.tonykeiser.mediaplayer;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -12,16 +8,18 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v7.app.NotificationCompat;
+import android.os.ResultReceiver;
 import android.util.Log;
+import android.widget.SeekBar;
+import android.widget.Switch;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.concurrent.TimeUnit;
+
 
 // ##########################################################
 // ######   Created by: TONY KEISER  MDF3 TERM: 1601   ######
@@ -29,19 +27,21 @@ import java.io.PrintWriter;
 public class MediaService extends Service {
     private static final String TAG = "FUNDAMENTALS";
     private static final String ACTION_CONTROLLER = "ACTION";
-    private static final int FOREGROUND_NOTIFICATION = 0x1001 ;
-    private static final int REQUEST_NOTIFY_LAUNCH = 0x1002;
     private String controller;
     private int counter = 0;
+    private boolean stopped = false;
+    private boolean playing = false;
     private int position;
     // Create Media Player, Idle
     private MediaPlayer player;
     private JSONArray playlist = new JSONArray();
+    ResultReceiver resultReceiver;
+    // Shuffle Variables
+    private boolean isShuffle = false;
+    private int randomNumber;
 
     public class ServiceBinder extends Binder {
-        public MediaService getService() {
-            return MediaService.this;
-        }
+        public MediaService getService() { return MediaService.this; }
     }
 
     ServiceBinder mBinder;
@@ -60,44 +60,14 @@ public class MediaService extends Service {
                 "already_home", "thousand_foot_krutch");
         trackSetup("Third Eye Blind", "Jumper", "A Collection", "jumper", "third_eye_blind");
     }
-    @Override
-    public IBinder onBind(Intent i) {
-        return mBinder;
-    }
 
-    @Override
-    public void onDestroy() {
-        if(player != null) {
-            player.stop();
-            player.release();
-            player = null;
-        }
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onUnbind(Intent i) {
-        if(player != null) {
-            player.stop();
-            player.release();
-            player = null;
-        }
-        return super.onUnbind(i);
-    }
-
-    public JSONObject currentMedia(){
-        // Pass current track to Details
-        JSONObject object = null;
-        try {
-            object = playlist.getJSONObject(counter);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return object;
-    }
     @Override
     public int onStartCommand(Intent i, int flags, int startId) {
         if (i != null) {
+            if (i.getParcelableExtra("receiver")!=null){
+                resultReceiver = i.getParcelableExtra("receiver");
+                return START_STICKY;
+            }
             if (i.hasExtra(ACTION_CONTROLLER)) {
                 controller = i.getStringExtra(ACTION_CONTROLLER);
                 switch (controller) {
@@ -116,6 +86,9 @@ public class MediaService extends Service {
                     case "FORWARD":
                         forwardAction();
                         break;
+                    case "SHUFFLE":
+                        shuffler();
+                        break;
                 }
             }
         }
@@ -125,17 +98,70 @@ public class MediaService extends Service {
     private void stopAction() {
         // Stop Track
         if (player != null) {
+            if(!stopped)
             player.stop();
             player.release();
+            playing = false;
+            stopped = true;
         }
+    }
+
+    public void seekbarChanged(int progress){
+        // Called from seekbar change from user
+        player.seekTo(progress);
+    }
+    public long seekbarDuration(){
+        // Called from seekbar change from user
+        return player.getDuration();
+    }
+    public long seekbarPosition(){
+        // Called from seekbar change from user
+        if(!playing) {
+            return 0;
+        } else {
+            return player.getCurrentPosition();
+        }
+    }
+
+    public void getDetails() {
+        Bundle bundle = new Bundle();
+        try {
+            bundle.putString("Artist", String.valueOf(playlist.getJSONObject(counter)
+                    .get("Artist")));
+            bundle.putString("Track", String.valueOf(playlist.getJSONObject(counter)
+                    .get("Track")));
+            bundle.putString("Album", String.valueOf(playlist.getJSONObject(counter)
+                    .get("Album")));
+            bundle.putString("Image", String.valueOf(playlist.getJSONObject(counter)
+                    .get("Image")));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        bundle.putLong("Duration", player.getDuration());
+        bundle.putLong("Position", player.getCurrentPosition());
+        resultReceiver.send(3, bundle);
+    }
+
+    private void shuffler(){
+        if(isShuffle) {
+            isShuffle = false;
+        } else {
+            isShuffle = true;
+        }
+    }
+    private void shufflePlay(){
+        // Create randomNumber based off number of trackUris
+        randomNumber = (int) (Math.random() * (playlist.length() - 1));
+        counter = randomNumber;
     }
 
     private void playAction() {
         String track = null;
+        if (isShuffle) shufflePlay();
         // Create Player if player = null;
         player = new MediaPlayer();
         // If player is NOT playing ... Start playing
-        if (!player.isPlaying()) {
+        if (!playing) {
             try {
                 track = (String) playlist.getJSONObject(counter).get("Song");
             } catch (JSONException e) {
@@ -145,9 +171,6 @@ public class MediaService extends Service {
                 player.setDataSource(this, Uri.parse(track));
             } catch (IOException e) {
                 e.printStackTrace();
-                player.stop();
-                player.release();
-                player = null;
             }
             // Prepare Media
             try {
@@ -162,8 +185,29 @@ public class MediaService extends Service {
                 public void onPrepared(MediaPlayer media) {
                     // Start Media
                     media.start();
-                    // Set up Notification
-                    mediaNotification(counter);
+                    stopped = false;
+                    playing = true;
+                    // Set up Notification to Receiver
+                    Bundle bundle = new Bundle();
+                    try {
+                        bundle.putString("Artist", String.valueOf(playlist.getJSONObject(counter)
+                                .get("Artist")));
+                        bundle.putString("Track", String.valueOf(playlist.getJSONObject(counter)
+                                .get("Track")));
+                        bundle.putString("Album", String.valueOf(playlist.getJSONObject(counter)
+                                .get("Album")));
+                        bundle.putString("Image", String.valueOf(playlist.getJSONObject(counter)
+                                .get("Image")));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    resultReceiver.send(1, bundle);
+                    // Set up Seeker to Receiver
+                    Bundle seeker = new Bundle();
+                    bundle.putLong("Duration", player.getDuration());
+                    bundle.putLong("Position", player.getCurrentPosition());
+                    resultReceiver.send(2, seeker);
+
                 }
             });
             player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -171,7 +215,6 @@ public class MediaService extends Service {
                 public void onCompletion(MediaPlayer player) {
                     // Go Play Next Track
                     forwardAction();
-                    Log.d(TAG, "onCompletion: Loading Next Song to play");
                 }
             });
         }
@@ -182,6 +225,7 @@ public class MediaService extends Service {
         if (player != null) {
             player.stop();
             player.release();
+            playing = false;
             if (counter != 0) {
                 counter--;
             } else {
@@ -210,7 +254,8 @@ public class MediaService extends Service {
         // Forward Track
         if (player != null) {
             player.stop();
-            //player.release();
+            player.release();
+            playing = false;
             if (counter != playlist.length()-1) {
                 counter++;
             } else {
@@ -241,24 +286,30 @@ public class MediaService extends Service {
         playlist.put(media);
     }
 
-    public void mediaNotification(int count){
-        NotificationManager mgr = (NotificationManager)
-                this.getSystemService(NOTIFICATION_SERVICE);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setSmallIcon(android.R.drawable.ic_dialog_alert);
-        try {
-            builder.setContentTitle("Playing: " + playlist.getJSONObject(count).get("Track"));
-            builder.setContentText("Aritst: " + playlist.getJSONObject(count).get("Artist") +
-            " on  Album: " + playlist.getJSONObject(count).get("Album"));
-        } catch (JSONException e) {
-            e.printStackTrace();
+    @Override
+    public IBinder onBind(Intent i) {
+        return mBinder = new ServiceBinder();
+    }
+
+    @Override
+    public void onDestroy() {
+        if(player != null) {
+            player.stop();
+            player.release();
+            player = null;
         }
-        builder.setAutoCancel(false);
-        builder.setOngoing(true);
-        Intent nIntent = new Intent(this, MediaMain.class);
-        PendingIntent pIntent = PendingIntent.getActivity(
-                this, REQUEST_NOTIFY_LAUNCH, nIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(pIntent);
-        mgr.notify(FOREGROUND_NOTIFICATION, builder.build());
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean onUnbind(Intent i) {
+        // Stop Track
+        if (player != null) {
+            if(!stopped)
+                player.stop();
+            player.release();
+            stopped = true;
+        }
+        return super.onUnbind(i);
     }
 }
