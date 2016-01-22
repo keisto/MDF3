@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Company Widget</string>
+    <string name="emptyText">No company assets added.</string>
+</resources>
